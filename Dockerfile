@@ -1,4 +1,4 @@
-FROM python:3.11.4-slim-bookworm
+FROM --platform=linux/amd64 python:3.11.4-slim-bookworm
 
 # install dependencies
 RUN apt-get update 
