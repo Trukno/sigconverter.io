@@ -1,9 +1,12 @@
+# Copy uv binary from the correct platform
+FROM --platform=linux/amd64 ghcr.io/astral-sh/uv:latest AS uv-binary
+
 FROM --platform=linux/amd64 python:3.11.4-slim-bookworm
 
 # install dependencies
-RUN apt-get update 
+RUN apt-get update
 RUN apt-get install -y git curl jq
-COPY --from=ghcr.io/astral-sh/uv:latest /uv /bin/uv
+COPY --from=uv-binary /uv /bin/uv
 
 # define work directory
 WORKDIR /app/
