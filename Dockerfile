@@ -4,7 +4,20 @@ FROM --platform=linux/amd64 ghcr.io/astral-sh/uv:latest AS uv-binary
 FROM --platform=linux/amd64 python:3.11.4-slim-bookworm
 
 # install dependencies
-RUN apt-get update
+#
+# `apt-get upgrade` is deliberate. The base is pinned to
+# python:3.11.4-slim-bookworm, published mid-2023, so its Debian packages are
+# stale and `apt-get install` alone never touches them. Once this image could
+# finally store a vulnerability report (see the header purge below), that
+# staleness showed up as 8 CRITICALs, every one already fixed upstream:
+#   libexpat1        2.5.0-1  -> 2.5.0-1+deb12u1   (CVE-2024-45491, -45492)
+#   libgnutls30      3.7.9-2  -> 3.7.9-2+deb12u7   (CVE-2026-33845, -42010)
+#   libkrb5-3, libk5crypto3, libkrb5support0, libgssapi-krb5-2
+#                    1.20.1-2 -> 1.20.1-2+deb12u2  (CVE-2024-37371 x4)
+#
+# Longer term the base tag itself should move to a current 3.11-slim-bookworm;
+# upgrading in-place patches the packages but still starts from a 2023 image.
+RUN apt-get update && apt-get upgrade -y
 RUN apt-get install -y git curl jq
 COPY --from=uv-binary /uv /bin/uv
 
